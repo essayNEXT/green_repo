@@ -3,18 +3,18 @@ from aiogram import types
 from aiogram.types import CallbackQuery
 from tg_bot.keyboards.inline import main_keyboard, categories_keyboard
 from bot import bot, dp
-from tg_bot.config import admin_id
+from tg_bot.config import ADMIN_ID
 from datetime import datetime
 from typing import Union
 
 async def send_to_admin(dp):
     " Функція відправки повідомлення адміну"
-    await bot.send_message(chat_id=admin_id, text="Бот активований")
-    await bot.send_message(chat_id=admin_id, text="Натисніть   /start")
+    await bot.send_message(chat_id=ADMIN_ID, text="Бот активований")
+    await bot.send_message(chat_id=ADMIN_ID, text="Натисніть   /start")
 
 
 async def on_shutdown(dp):
-    await bot.send_message(chat_id=admin_id, text="Бот деактивовано")
+    await bot.send_message(chat_id=ADMIN_ID, text="Бот деактивовано")
     await bot.session.close()
 
 

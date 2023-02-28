@@ -4,12 +4,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_TOKEN = str(os.getenv("BOT_TOKEN"))
-admin_id = str(os.getenv("ADMINS"))
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = os.getenv("ADMINS")
 
-PGUSER = str(os.getenv("PGUSER"))
-PGPASSWORD = str(os.getenv("PG_PASSWORD"))
-host = str(os.getenv("PG_HOST"))
+# PGUSER = os.getenv("PGUSER")
+# PGPASSWORD = os.getenv("PG_PASSWORD")
+# host = os.getenv("PG_HOST")
+
 
 # from dataclasses import dataclass
 #
