@@ -1,3 +1,63 @@
+services:
+  tg_bot:
+    container_name: tg_bot_container
+    image: tg_bot_image
+    build:
+      context: .
+    environment:
+      DB_HOST: bot_db
+      DB_NAME: greendb
+      DB_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      BOT_TOKEN: "${BOT_TOKEN}"
+    depends_on:
+      - bot_db
+
+  django:
+    build: .
+    container_name: django_container
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - bot_db
+    volumes:
+      - .:/home/green_team/app
+
+
+  bot_db:
+    container_name: postgres_container
+    image: postgres
+    volumes:
+      - postgres_data:/data/postgres
+    ports:
+      - "5432:5432"
+    environment:
+      DB_NAME: greendb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /data/postgres
+#      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    profiles:
+      - "dev"
+    restart: on-failure
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: tg_bot
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+
+volumes:
+  postgres_data:
+  pgadmin_data:
 #version: '3.3'
 #
 #services:
