@@ -1,5 +1,5 @@
-import pg_green
+from study_project.database.pg_green import PDatabaseConnect as DB
 
-db = pg_green.PDatabaseConnect()
+db = DB()
 print(db)
-db.create_database(True);
+db.create_database(True)

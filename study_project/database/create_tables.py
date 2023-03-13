@@ -1,6 +1,6 @@
 """Створює таблиці в БД, якщо вони відсутні"""
 
-from pg_green import PDatabaseConnect as DB
+from study_project.database.pg_green import PDatabaseConnect as DB
 
 db = DB()
 print(db)
