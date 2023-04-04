@@ -1,11 +1,8 @@
-"""Створює таблиці в БД, якщо вони відсутні"""
-
 from study_project.database.pg_green import PDatabaseConnect as DB
 
 db = DB()
 print(db)
 
-# Список SQL запитів на створення таблиць
 table_lst = [
                # Таблиця рівня доступу Permission
                """CREATE TABLE IF NOT EXISTS permission
@@ -81,6 +78,17 @@ table_lst = [
                    );
                 """
             ,
+                """CREATE TABLE IF NOT EXISTS countries
+                    (
+                        id_country SERIAL PRIMARY KEY,
+                        country_name TEXT NOT NULL UNIQUE,
+                        short_name TEXT,
+                        phonecode INTEGER NOT NULL,
+                        timezone TEXT
+                    );
+                 """
+            ,
+
                 # Таблиця людей People
                 # position_id - зовнішній ключ, зв'язує з табліцею посад
                 # permit_id - зовнішній ключ, зв'язує з табліцєю типів прав доступу
@@ -92,15 +100,16 @@ table_lst = [
                             second_name  TEXT NOT NULL,
                             middle_name  TEXT,
                             gender TEXT  NOT NULL,
-                            country TEXT NOT NULL,
+                            country_id INTEGER NOT NULL,
                             phone_number TEXT,
-                            email        TEXT NOT NULL,
+                            email        TEXT UNIQUE,
                             birthday     date,
-                            login        TEXT NOT NULL,
-                            login_tlg    TEXT NOT NULL,
+                            login        TEXT UNIQUE,
+                            login_tlg    TEXT UNIQUE,
                             date_reg     date DEFAULT CURRENT_DATE,
                             position_id   INTEGER NOT NULL,
                             permit_id   INTEGER NOT NULL,
+                                FOREIGN KEY (country_id) REFERENCES countries(id_country),
                                 FOREIGN KEY (position_id) REFERENCES person_position(id_position),
                                 FOREIGN KEY (permit_id) REFERENCES permission(id_permit)
                         );
@@ -212,5 +221,5 @@ table_lst = [
                         );
                 """
             ]
-# Список перевається в db для виконання запитів SQL
+
 db.create_database_tables(table_lst, True)

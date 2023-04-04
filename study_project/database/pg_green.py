@@ -42,18 +42,12 @@ class PDatabaseConnect:
     """
     def __init__(self):
         if dotenv.load_dotenv():
+            self.__host = os.environ["DB_HOST"]
             self.__port = os.environ["DB_PORT"]
+            self.__server = os.environ["POSTGRES_SERVER"]
+            self.__user = os.environ["POSTGRES_USER"]
+            self.__password = os.environ["POSTGRES_PASSWORD"]
             self.__db_name = os.environ["DB_NAME"]
-            self.__host = os.environ["PG_HOST"]
-            self.__user = os.environ["PG_USER"]
-            try:
-                self.__password = os.environ["PG_PASSWORD"]
-            except:
-                self.__password = "postgres"
-            try:
-                self.__server = os.environ["PG_SERVER"]
-            except:
-                self.__server = "postgres"
         else:
             self.setting(db_name='postgres', password='postgres')
 
@@ -68,9 +62,9 @@ class PDatabaseConnect:
         dotenv_path = ".env"
         dotenv.set_key(dotenv_path, "DB_HOST", self.__host)
         dotenv.set_key(dotenv_path, "DB_PORT", self.__port)
-        dotenv.set_key(dotenv_path, "PG_SERVER", self.__server)
-        dotenv.set_key(dotenv_path, "PG_USER", self.__user)
-        dotenv.set_key(dotenv_path, "PG_PASSWORD", self.__password)
+        dotenv.set_key(dotenv_path, "POSTGRES_SERVER", self.__server)
+        dotenv.set_key(dotenv_path, "POSTGRES_USER", self.__user)
+        dotenv.set_key(dotenv_path, "POSTGRES_PASSWORD", self.__password)
         dotenv.set_key(dotenv_path, "DB_NAME", self.__db_name)
 
     def get_connection(self):
@@ -93,9 +87,9 @@ class PDatabaseConnect:
             cursor.execute(sql)
             if prnt:
                 print(f"Database {name_db} is created successful")
-        except OperationalError:
+        except OperationalError as e:
             if prnt:
-                print(f"The database {name_db} have already existed")
+                print(f"The database {name_db} have already existed: {e}")
         except:
             print(f"Error creating the database {name_db}")
             ret = False
@@ -105,7 +99,7 @@ class PDatabaseConnect:
 
         return ret
 
-    def _execute_query(self, conn, query, prnt=False):
+    def _execute_save_query(self, conn, query, prnt=False):
         """
         Doing sql-query
         conn - DataBase connection -> psycopg2.connection
@@ -122,6 +116,54 @@ class PDatabaseConnect:
             else:
                 raise OperationalError
 
+    def _execute_read_query(self, conn, query, prnt=False):
+        """
+        Doing sql-query for reading
+        conn - DataBase connection -> psycopg2.connection
+        """
+        cursor = conn.cursor()
+        result = None
+        try:
+            cursor.execute(query)
+            result = cursor.fetchall()
+            if prnt:
+                print(f"Query {query} is executed successfully")
+                print(result)
+        except OperationalError as e:
+            if prnt:
+                print(f"The error '{e}' occurred")
+            else:
+                raise OperationalError
+
+        return result
+
+    def write_db(self, query, prnt=False):
+        """
+        Doing sql-query
+        """
+        conn = create_connection(self.__db_name, self.__user, self.__password, self.__host, self.__port, prnt)
+        if conn == None: return False
+        if prnt: print("Connect to Database")
+
+        self._execute_save_query(conn, query, prnt)
+
+        conn.close()
+
+
+    def read_db(self, query, prnt=False):
+        """  Doing sql-query for reading """
+
+        conn = create_connection(self.__db_name, self.__user, self.__password, self.__host, self.__port, prnt)
+        if conn == None: return None
+        if prnt: print("Connect to Database")
+
+        res = self._execute_read_query(conn, query, prnt)
+
+        conn.close()
+
+        return res
+
+
     def create_database_tables(self, lst_table, prnt = False) -> bool:
         """
         Create tables
@@ -133,7 +175,7 @@ class PDatabaseConnect:
         if prnt: print("Connect to Database")
 
         for query in lst_table:
-            self._execute_query(conn, query, prnt)
+            self._execute_save_query(conn, query, prnt)
 
         conn.close()
 
@@ -141,3 +183,4 @@ class PDatabaseConnect:
         return f"Parameters: Server name: {self.__server}\nDatabase name: {self.__db_name}\n" + \
             f"User: {self.__user}\nPassword: {self.__password}\nHost: {self.__host}\nPort: {self.__port}\n"
 
+greenDB = PDatabaseConnect()
